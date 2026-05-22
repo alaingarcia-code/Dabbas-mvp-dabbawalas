@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DABBAS – Nutrición y Acompañamiento</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --granate: #800020;
+    --granate-light: #9b1a3a;
+    --granate-pale: #fdf0f3;
+    --crema: #FDF5E6;
+    --crema-dark: #f5e6cc;
+    --pizarra: #F8FAFC;
+    --verde: #059669;
+    --verde-pale: #ecfdf5;
+    --rojo-alerta: #991B1B;
+    --rojo-pale: #FEE2E2;
+    --azul-slate: #475569;
+    --text-main: #1e293b;
+    --text-soft: #64748b;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--pizarra); color: var(--text-main); }
+  .font-display { font-family: 'Playfair Display', serif; }
+  .btn-primary {
+    background: var(--granate); color: white; border: none; cursor: pointer;
+    border-radius: 8px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+    transition: all 0.2s; padding: 10px 20px;
+  }
+  .btn-primary:hover { background: var(--granate-light); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(128,0,32,0.25); }
+  .btn-secondary {
+    background: white; color: var(--granate); border: 1.5px solid var(--granate);
+    cursor: pointer; border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-weight: 500; transition: all 0.2s; padding: 10px 20px;
+  }
+  .btn-secondary:hover { background: var(--granate-pale); }
+  .card {
+    background: white; border-radius: 16px; border: 1px solid var(--border);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  }
+  .tab-active {
+    background: var(--granate); color: white; border-radius: 8px;
+    font-weight: 600; padding: 8px 18px; cursor: pointer; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif; border: none;
+  }
+  .tab-inactive {
+    background: transparent; color: var(--text-soft); border-radius: 8px;
+    font-weight: 500; padding: 8px 18px; cursor: pointer; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif; border: none;
+  }
+  .tab-inactive:hover { background: var(--granate-pale); color: var(--granate); }
+  .alerta-critica {
+    background: var(--rojo-pale); border: 1.5px solid #fca5a5;
+    border-radius: 10px; color: var(--rojo-alerta);
+  }
+  .alerta-critica-pulse {
+    animation: pulse-red 1.5s infinite;
+    background: var(--rojo-pale); border: 2px solid #ef4444;
+    border-radius: 10px; color: var(--rojo-alerta);
+  }
+  @keyframes pulse-red {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+  }
+  .badge-alerta { background: var(--rojo-pale); color: var(--rojo-alerta); border: 1px solid #fca5a5; border-radius: 20px; font-size: 11px; font-weight: 600; padding: 2px 10px; display: inline-block; }
+  .badge-ok { background: var(--verde-pale); color: var(--verde); border: 1px solid #6ee7b7; border-radius: 20px; font-size: 11px; font-weight: 600; padding: 2px 10px; display: inline-block; }
+  .badge-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; border-radius: 20px; font-size: 11px; font-weight: 600; padding: 2px 10px; display: inline-block; }
+  .badge-warn { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; border-radius: 20px; font-size: 11px; font-weight: 600; padding: 2px 10px; display: inline-block; }
+  input, select, textarea {
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 13px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-main);
+    background: white; width: 100%; transition: border 0.2s; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--granate); }
+  label { font-size: 13px; font-weight: 600; color: var(--azul-slate); margin-bottom: 4px; display: block; }
+  .env-toggle { padding: 5px; background: white; border-radius: 12px; border: 1px solid var(--border); display: inline-flex; gap: 4px; }
+  .env-btn-active { background: var(--granate); color: white; border: none; border-radius: 8px; padding: 8px 22px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; transition: all 0.2s; }
+  .env-btn-inactive { background: transparent; color: var(--text-soft); border: none; border-radius: 8px; padding: 8px 22px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; transition: all 0.2s; }
+  .env-btn-inactive:hover { background: var(--granate-pale); color: var(--granate); }
+  .ruta-card { border-left: 4px solid var(--granate); background: var(--crema); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; }
+  .timer-circle { width: 90px; height: 90px; border-radius: 50%; border: 5px solid var(--granate); display: flex; align-items: center; justify-content: center; flex-direction: column; background: var(--granate-pale); }
+  .star { font-size: 22px; cursor: pointer; transition: transform 0.1s; }
+  .star:hover { transform: scale(1.2); }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+  .modal-box { background: white; border-radius: 20px; padding: 32px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .whatsapp-mock { background: #075E54; border-radius: 20px; overflow: hidden; }
+  .wabubble { background: #dcf8c6; border-radius: 12px 12px 0 12px; padding: 12px 14px; font-size: 13px; color: #111; max-width: 85%; margin-left: auto; }
+  .progress-step { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .step-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .section-divider { height: 1px; background: var(--border); margin: 20px 0; }
+  ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #f1f1f1; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  .fade-in { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .preference-like { background: var(--verde-pale); border: 1.5px solid #6ee7b7; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .preference-dislike { background: var(--rojo-pale); border: 1.5px solid #fca5a5; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ─── INITIAL DATA ───────────────────────────────────────────────────────────
+const initialClients = [
+  {
+    id: 1, nombre: "Marta Rojas", edad: 82, direccion: "C/ Somera 12, 1ºA, Bilbao",
+    autonomia: "Dependiente", estadoCognitivo: "Demencia", 
+    contactoNombre: "Elena Rojas (Hija)", contactoTel: "+34 688 223 344",
+    alertas: ["Disfagia", "Hipertensión", "Diabetes"],
+    exclusiones: ["Alimentos duros", "Sal añadida"],
+    onboardingFirmado: true,
+    visitasHoy: [{
+      temp: "65°C", usabilidad: "Necesitó ayuda", sabor: 4, textura: 3, apariencia: 4,
+      notas: "Marta estaba un poco desorientada hoy pero se animó mucho al ver el plato. Comió con ayuda. Se puso contenta cuando le pusimos la música del fondo.",
+      fecha: "2025-01-15", generado: true
+    }],
+    preferencias: { likes: ["Crema de verduras", "Merluza al vapor"], dislikes: ["Guisantes", "Coliflor"] },
+    platos: []
+  },
+  {
+    id: 2, nombre: "José Mari Etxebarria", edad: 76, direccion: "Avda. Lehendakari Aguirre 45, Bilbao",
+    autonomia: "Autónomo", estadoCognitivo: "Normal",
+    contactoNombre: "Aitor Etxebarria (Hijo)", contactoTel: "+34 644 112 233",
+    alertas: ["Hipertensión"],
+    exclusiones: ["Verduras", "Espinacas"],
+    onboardingFirmado: true,
+    visitasHoy: [{
+      temp: "62°C", usabilidad: "Se comió directo", sabor: 5, textura: 5, apariencia: 4,
+      notas: "Josemari estaba de buen humor y con mucha energía. Comió todo el plato sin ayuda y nos pidió si podíamos cambiar la franja horaria a la mañana temprano.",
+      fecha: "2025-01-15", generado: true
+    }],
+    preferencias: { likes: ["Merluza en salsa", "Lentejas estofadas"], dislikes: ["Brócoli", "Judías verdes", "Espinacas"] },
+    platos: []
+  },
+  {
+    id: 3, nombre: "Mila Goikoetxea", edad: 79, direccion: "C/ Máximo Aguirre 8, 3ºB, Bilbao",
+    autonomia: "Autónomo", estadoCognitivo: "Normal",
+    contactoNombre: "Ines Goikoetxea (Hija)", contactoTel: "+34 655 445 566",
+    alertas: [],
+    exclusiones: [],
+    onboardingFirmado: false,
+    visitasHoy: [],
+    preferencias: { likes: ["Caldo de pollo", "Tortilla española"], dislikes: [] },
+    platos: []
+  }
+];
+
+const platosDisponibles = [
+  { id: 1, nombre: "Crema de calabaza y jengibre", proveedor: "Sukaldetxu", categoria: "Primero", textura: "Triturado", apto_disfagia: true, precio: 4.2 },
+  { id: 2, nombre: "Merluza al vapor con puerros", proveedor: "Sukaldetxu", categoria: "Segundo", textura: "Suave", apto_disfagia: true, precio: 6.8 },
+  { id: 3, nombre: "Pollo asado con patatas", proveedor: "Sukaldetxu", categoria: "Segundo", textura: "Normal", apto_disfagia: false, precio: 5.9 },
+  { id: 4, nombre: "Lentejas estofadas", proveedor: "Sukaldetxu", categoria: "Primero", textura: "Normal", apto_disfagia: false, precio: 3.8 },
+  { id: 5, nombre: "Tortilla española", proveedor: "Sukaldetxu", categoria: "Segundo", textura: "Suave", apto_disfagia: true, precio: 4.5 },
+  { id: 6, nombre: "Caldo de pollo con fideos", proveedor: "Sukaldetxu", categoria: "Primero", textura: "Líquido", apto_disfagia: true, precio: 3.2 },
+];
+
+const rutasSimuladas = [
+  { id: "R1", nombre: "Ruta Casco Viejo", clientes: [1, 2], salida: "08:30", llegada: "09:50", km: 4.2, estado: "En progreso" },
+  { id: "R2", nombre: "Ruta Mungia Norte", clientes: [3], salida: "10:15", llegada: "11:00", km: 18.7, estado: "Pendiente" },
+];
+
+// ─── ICON HELPER ─────────────────────────────────────────────────────────────
+function Icon({ name, size = 16, className = "" }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (ref.current && lucide[name]) {
+      ref.current.innerHTML = "";
+      const el = lucide.createIcons ? null : null;
+      const svg = lucide[name]([size, size], { class: className });
+      if (typeof svg === "string") ref.current.innerHTML = svg;
+      else {
+        const icon = document.createElement("span");
+        lucide.createIcons({ nameAttr: "data-lucide", attrs: {} });
+        ref.current.innerHTML = `<i data-lucide="${name.toLowerCase()}" style="width:${size}px;height:${size}px"></i>`;
+        lucide.createIcons({ nodes: ref.current.querySelectorAll("[data-lucide]") });
+      }
+    }
+  }, [name, size]);
+  return <span ref={ref} className={`inline-flex items-center justify-center ${className}`} style={{width:size,height:size}} />;
+}
+
+// Simple SVG icons inline
+const icons = {
+  ChevronRight: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>,
+  AlertTriangle: ({size=16,color="currentColor"}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+  User: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  MapPin: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+  Clock: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  Heart: ({size=16,fill="none"}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>,
+  Check: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>,
+  X: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Star: ({size=20,fill="none",color="#f59e0b"}) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  Send: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+  Plus: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+  Trash: ({size=14}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
+  Activity: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Package: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+  ClipboardList: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2h-2"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="15" y2="14"/></svg>,
+  Users: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+  MessageCircle: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>,
+  Settings: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
+  Sparkles: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M19 3l.8 2.2L22 6l-2.2.8L19 9l-.8-2.2L16 6l2.2-.8z"/></svg>,
+  Thermometer: ({size=16}) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>,
+};
+
+// ─── GENERATE AI SUMMARY ─────────────────────────────────────────────────────
+function generateAISummary(client, visita) {
+  const nombre = client.nombre.split(" ")[0];
+  const tutor = client.contactoNombre.split(" ")[0];
+  const usabilidad = visita.usabilidad;
+  const notas = visita.notas;
+  
+  let usabilidadText = "";
+  if (usabilidad === "Se comió directo") usabilidadText = "disfrutó de su menú de forma completamente autónoma";
+  else if (usabilidad === "Emplatado en formato catering familiar") usabilidadText = "optó por emplatar el menú en casa, como le gusta";
+  else usabilidadText = "contó con el apoyo de nuestro repartidor para disfrutar de su comida";
+  
+  const estrellas = Math.round((visita.sabor + visita.textura + visita.apariencia) / 3);
+  const valoracion = estrellas >= 4 ? "¡Las valoraciones del menú han sido muy positivas!" : "El menú ha sido valorado con normalidad.";
+  
+  return `Hola ${tutor}, hoy hemos visitado a ${nombre} y ${usabilidadText}. ${notas.charAt(0).toUpperCase() + notas.slice(1)} ${valoracion} Mañana continuaremos cuidándole con el mismo cariño. 💛`;
+}
+
+// ─── ONBOARDING FORM ─────────────────────────────────────────────────────────
+function OnboardingForm({ clients, setClients }) {
+  const [form, setForm] = useState({
+    nombre: "", edad: "", direccion: "", autonomia: "Autónomo", estadoCognitivo: "Normal",
+    contactoNombre: "", contactoTel: "", alertas: [], exclusiones: "", onboardingFirmado: false
+  });
+  const [saved, setSaved] = useState(false);
+  const [errors, setErrors] = useState({});
+  const alertasOpciones = ["Disfagia", "Hipertensión", "Diabetes", "Alergias"];
+
+  const toggleAlerta = (a) => {
+    setForm(f => ({...f, alertas: f.alertas.includes(a) ? f.alertas.filter(x=>x!==a) : [...f.alertas, a]}));
+  };
+
+  const validate = () => {
+    let e = {};
+    if (!form.nombre) e.nombre = "Obligatorio";
+    if (!form.contactoNombre) e.contactoNombre = "Contacto secundario obligatorio";
+    if (!form.contactoTel) e.contactoTel = "Teléfono obligatorio";
+    return e;
+  };
+
+  const handleSave = () => {
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    const newClient = {
+      id: Date.now(), ...form, edad: parseInt(form.edad)||70,
+      exclusiones: form.exclusiones ? form.exclusiones.split(",").map(s=>s.trim()) : [],
+      visitasHoy: [], preferencias: { likes: [], dislikes: [] }, platos: []
+    };
+    setClients(prev => [...prev, newClient]);
+    setSaved(true);
+    setTimeout(() => { setSaved(false); setForm({nombre:"",edad:"",direccion:"",autonomia:"Autónomo",estadoCognitivo:"Normal",contactoNombre:"",contactoTel:"",alertas:[],exclusiones:"",onboardingFirmado:false}); }, 2500);
+  };
+
+  return (
+    <div className="fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <div style={{background:"var(--granate-pale)",borderRadius:"12px",padding:"10px"}}>
+          <icons.Users size={22} />
+        </div>
+        <div>
+          <h2 className="font-display text-xl font-bold" style={{color:"var(--granate)"}}>Registro de Nuevo Cliente</h2>
+          <p style={{color:"var(--text-soft)",fontSize:"13px"}}>Ficha clínica y datos de acompañamiento</p>
+        </div>
+      </div>
+
+      {saved && (
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-xl" style={{background:"var(--verde-pale)",border:"1px solid #6ee7b7",color:"var(--verde)"}}>
+          <icons.Check size={16}/> <span style={{fontWeight:600}}>Cliente registrado correctamente</span>
+        </div>
+      )}
+
+      <div className="grid gap-4" style={{gridTemplateColumns:"1fr 1fr"}}>
+        <div>
+          <label>Nombre completo *</label>
+          <input value={form.nombre} onChange={e=>setForm(f=>({...f,nombre:e.target.value}))} placeholder="Ej: Ana García López"/>
+          {errors.nombre && <span style={{color:"#dc2626",fontSize:"12px"}}>{errors.nombre}</span>}
+        </div>
+        <div>
+          <label>Edad</label>
+          <input type="number" value={form.edad} onChange={e=>setForm(f=>({...f,edad:e.target.value}))} placeholder="78"/>
+        </div>
+        <div style={{gridColumn:"1/-1"}}>
+          <label>Dirección</label>
+          <input value={form.direccion} onChange={e=>setForm(f=>({...f,direccion:e.target.value}))} placeholder="C/ Ejemplo 12, 2ºA, Bilbao"/>
+        </div>
+        <div>
+          <label>Nivel de Autonomía</label>
+          <select value={form.autonomia} onChange={e=>setForm(f=>({...f,autonomia:e.target.value}))}>
+            <option>Autónomo</option><option>Semi-dependiente</option><option>Dependiente</option>
+          </select>
+        </div>
+        <div>
+          <label>Estado Cognitivo</label>
+          <select value={form.estadoCognitivo} onChange={e=>setForm(f=>({...f,estadoCognitivo:e.target.value}))}>
+            <option>Normal</option><option>Deterioro leve</option><option>Demencia</option>
+          </select>
+        </div>
+        <div>
+          <label>Contacto Secundario (Nombre) *</label>
+          <input value={form.contactoNombre} onChange={e=>setForm(f=>({...f,contactoNombre:e.target.value}))} placeholder="Elena García (Hija)"/>
+          {errors.contactoNombre && <span style={{color:"#dc2626",fontSize:"12px"}}>{errors.contactoNombre}</span>}
+        </div>
+        <div>
+          <label>Teléfono Contacto *</label>
+          <input value={form.contactoTel} onChange={e=>setForm(f=>({...f,contactoTel:e.target.value}))} placeholder="+34 600 000 000"/>
+          {errors.contactoTel && <span style={{color:"#dc2626",fontSize:"12px"}}>{errors.contactoTel}</span>}
+        </div>
+      </div>
+
+      <div className="section-divider"/>
+
+      <div className="mb-4">
+        <label style={{marginBottom:"10px"}}>⚠️ Alertas Médicas Críticas</label>
+        <div className="flex gap-2 flex-wrap">
+          {alertasOpciones.map(a => (
+            <button key={a} onClick={()=>toggleAlerta(a)}
+              style={{padding:"6px 14px",borderRadius:"20px",border:"1.5px solid",cursor:"pointer",fontWeight:600,fontSize:"13px",fontFamily:"'DM Sans',sans-serif",
+                background: form.alertas.includes(a) ? "#FEE2E2" : "white",
+                borderColor: form.alertas.includes(a) ? "#fca5a5" : "var(--border)",
+                color: form.alertas.includes(a) ? "var(--rojo-alerta)" : "var(--text-soft)"
+              }}>
+              {a}
+            </button>
+          ))}
+        </div>
+        {form.alertas.includes("Disfagia") && (
+          <div className="alerta-critica p-3 mt-3 flex items-center gap-2 text-sm">
+            <icons.AlertTriangle size={16} color="var(--rojo-alerta)"/>
+            <strong>DISFAGIA ACTIVA:</strong> Este cliente solo podrá recibir platos con textura apta (triturado/líquido).
+          </div>
+        )}
+      </div>
+
+      <div className="mb-4">
+        <label>Exclusiones de ingredientes</label>
+        <input value={form.exclusiones} onChange={e=>setForm(f=>({...f,exclusiones:e.target.value}))} placeholder="Ej: verduras, picante, lactosa (separados por comas)"/>
+      </div>
+
+      <div className="flex items-center gap-3 p-3 rounded-xl mb-5" style={{background:"var(--crema)",border:"1px solid var(--crema-dark)"}}>
+        <input type="checkbox" id="onb" checked={form.onboardingFirmado} onChange={e=>setForm(f=>({...f,onboardingFirmado:e.target.checked}))} style={{width:"auto",accentColor:"var(--granate)"}}/>
+        <label htmlFor="onb" style={{margin:0,cursor:"pointer",color:"var(--text-main)"}}>
+          ✅ Onboarding firmado y folleto de servicio entregado al cliente/familiar
+        </label>
+      </div>
+
+      <button className="btn-primary w-full" style={{fontSize:"15px",padding:"12px"}} onClick={handleSave}>
+        Registrar Cliente
+      </button>
+
+      <div className="section-divider"/>
+
+      <div>
+        <h3 className="font-display font-bold mb-3" style={{color:"var(--text-main)"}}>Clientes Activos ({clients.length})</h3>
+        <div className="grid gap-3">
+          {clients.map(c => (
+            <div key={c.id} className="card p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div style={{width:38,height:38,borderRadius:"50%",background:"var(--granate-pale)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <icons.User size={18}/>
+                </div>
+                <div>
+                  <div style={{fontWeight:600,fontSize:"14px"}}>{c.nombre}</div>
+                  <div style={{color:"var(--text-soft)",fontSize:"12px"}}>{c.direccion}</div>
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap justify-end">
+                {c.estadoCognitivo !== "Normal" && <span className="badge-warn">{c.estadoCognitivo}</span>}
+                {c.alertas.includes("Disfagia") && <span className="badge-alerta">Disfagia</span>}
+                {c.alertas.length > 0 && !c.alertas.includes("Disfagia") && <span className="badge-alerta">{c.alertas[0]}</span>}
+                {c.onboardingFirmado ? <span className="badge-ok">Onboarding ✓</span> : <span className="badge-warn">Sin firmar</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── LOGISTICS MODULE ────────────────────────────────────────────────────────
+function LogisticaModule({ clients }) {
+  const [timerActive, setTimerActive] = useState(false);
+  const [timerVal, setTimerVal] = useState(0);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [alertaPlato, setAlertaPlato] = useState(null);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (timerActive) {
+      intervalRef.current = setInterval(() => setTimerVal(v => v+1), 1000);
+    } else clearInterval(intervalRef.current);
+    return () => clearInterval(intervalRef.current);
+  }, [timerActive]);
+
+  const formatTimer = (s) => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  const timerColor = timerVal >= 900 ? "var(--verde)" : timerVal >= 600 ? "#f59e0b" : "var(--granate)";
+  const timerPct = Math.min(timerVal / 1200 * 100, 100);
+
+  const checkPlato = (plato, client) => {
+    if (client && client.alertas.includes("Disfagia") && !plato.apto_disfagia) {
+      setAlertaPlato({ plato, client });
+    }
+  };
+
+  return (
+    <div className="fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <div style={{background:"var(--granate-pale)",borderRadius:"12px",padding:"10px"}}>
+          <icons.Package size={22}/>
+        </div>
+        <div>
+          <h2 className="font-display text-xl font-bold" style={{color:"var(--granate)"}}>Logística y COGS</h2>
+          <p style={{color:"var(--text-soft)",fontSize:"13px"}}>Planificación de rutas Bilbao–Mungia · Proveedor: Sukaldetxu</p>
+        </div>
+      </div>
+
+      {alertaPlato && (
+        <div className="alerta-critica-pulse p-4 mb-4 flex items-start gap-3">
+          <icons.AlertTriangle size={20} color="var(--rojo-alerta)"/>
+          <div>
+            <div style={{fontWeight:700,fontSize:"15px"}}>⛔ PELIGRO: INCOMPATIBILIDAD CLÍNICA DETECTADA</div>
+            <div style={{marginTop:4,fontSize:"13px"}}>
+              <strong>{alertaPlato.client.nombre}</strong> tiene <strong>DISFAGIA</strong> activa. 
+              El plato "<strong>{alertaPlato.plato.nombre}</strong>" (textura: {alertaPlato.plato.textura}) <strong>NO es apto</strong> para este paciente.
+            </div>
+            <button onClick={()=>setAlertaPlato(null)} className="mt-2" style={{background:"var(--rojo-alerta)",color:"white",border:"none",borderRadius:"6px",padding:"4px 12px",cursor:"pointer",fontSize:"12px",fontFamily:"'DM Sans',sans-serif"}}>
+              Entendido — Cambiar plato
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-5" style={{gridTemplateColumns:"1fr 1fr"}}>
+        {/* Rutas */}
+        <div>
+          <h3 style={{fontWeight:700,marginBottom:"12px",fontSize:"15px"}}>🗺 Rutas de Hoy</h3>
+          {rutasSimuladas.map(ruta => (
+            <div key={ruta.id} className="ruta-card">
+              <div className="flex items-center justify-between mb-2">
+                <span style={{fontWeight:700,fontSize:"14px"}}>{ruta.nombre}</span>
+                <span className={ruta.estado === "En progreso" ? "badge-ok" : "badge-info"}>{ruta.estado}</span>
+              </div>
+              <div className="flex gap-4 text-sm" style={{color:"var(--text-soft)"}}>
+                <span>🕐 {ruta.salida} → {ruta.llegada}</span>
+                <span>📍 {ruta.km} km</span>
+              </div>
+              <div className="mt-2">
+                {ruta.clientes.map(cid => {
+                  const c = clients.find(x=>x.id===cid);
+                  if(!c) return null;
+                  return (
+                    <div key={cid} className="flex items-center gap-2 mt-1">
+                      <div style={{width:6,height:6,borderRadius:"50%",background:"var(--granate)"}}/>
+                      <span style={{fontSize:"13px",fontWeight:500}}>{c.nombre}</span>
+                      {c.alertas.includes("Disfagia") && <span className="badge-alerta" style={{fontSize:"10px"}}>Disfagia</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Acompañamiento Timer */}
+        <div>
+          <h3 style={{fontWeight:700,marginBottom:"12px",fontSize:"15px"}}>⏱ Temporizador Acompañamiento</h3>
+          <div className="card p-5 text-center">
+            <p style={{fontSize:"12px",color:"var(--text-soft)",marginBottom:"12px"}}>Mínimo obligatorio: 15-20 min por visita</p>
+            <div className="flex justify-center mb-3">
+              <div style={{width:100,height:100,borderRadius:"50%",border:`6px solid ${timerColor}`,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",background:timerVal>=900?"var(--verde-pale)":"var(--granate-pale)",transition:"all 0.5s"}}>
+                <span style={{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:700,color:timerColor}}>{formatTimer(timerVal)}</span>
+                <span style={{fontSize:"10px",color:"var(--text-soft)"}}>mm:ss</span>
+              </div>
+            </div>
+            <div style={{height:6,background:"#e2e8f0",borderRadius:99,overflow:"hidden",marginBottom:"12px"}}>
+              <div style={{height:"100%",width:`${timerPct}%`,background:timerColor,borderRadius:99,transition:"width 0.5s"}}/>
+            </div>
+            {timerVal >= 900 && <div className="badge-ok mb-2">✓ Mínimo cumplido</div>}
+            <div className="flex gap-2 justify-center">
+              <button className="btn-primary" style={{padding:"8px 16px",fontSize:"13px"}} onClick={()=>setTimerActive(v=>!v)}>
+                {timerActive ? "⏸ Pausar" : "▶ Iniciar"}
+              </button>
+              <button className="btn-secondary" style={{padding:"8px 16px",fontSize:"13px"}} onClick={()=>{setTimerVal(0);setTimerActive(false);}}>
+                ↺ Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="section-divider"/>
+
+      {/* Platos Sukaldetxu */}
+      <h3 style={{fontWeight:700,marginBottom:"12px",fontSize:"15px"}}>🍽 Inventario Sukaldetxu — Menú Disponible</h3>
+      <div className="mb-3">
+        <label style={{marginBottom:"6px"}}>Filtro de seguridad: seleccionar cliente</label>
+        <select value={selectedClient||""} onChange={e=>setSelectedClient(e.target.value ? parseInt(e.target.value) : null)} style={{maxWidth:"280px"}}>
+          <option value="">Sin filtro de cliente</option>
+          {clients.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+        </select>
+      </div>
+      <div className="grid gap-3" style={{gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))"}}>
+        {platosDisponibles.map(p => {
+          const client = clients.find(c=>c.id===selectedClient);
+          const incompatible = client && client.alertas.includes("Disfagia") && !p.apto_disfagia;
+          return (
+            <div key={p.id} className="card p-4" style={incompatible?{border:"2px solid #ef4444"}:{}}>
+              <div className="flex items-start justify-between mb-2">
+                <div style={{fontWeight:600,fontSize:"14px"}}>{p.nombre}</div>
+                <span style={{fontWeight:700,color:"var(--granate)",fontSize:"13px"}}>{p.precio}€</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <span className="badge-info">{p.categoria}</span>
+                <span style={{background:"#f1f5f9",color:"var(--text-soft)",borderRadius:"20px",fontSize:"11px",padding:"2px 8px",fontWeight:600}}>{p.textura}</span>
+                {p.apto_disfagia && <span className="badge-ok">Apto disfagia</span>}
+              </div>
+              {incompatible && (
+                <div className="flex items-center gap-1 mt-2 text-xs" style={{color:"var(--rojo-alerta)",fontWeight:600}}>
+                  <icons.AlertTriangle size={12} color="var(--rojo-alerta)"/> No apto para {client.nombre}
+                </div>
+              )}
+              {client && !incompatible && (
+                <button className="mt-2 w-full btn-secondary" style={{fontSize:"12px",padding:"5px"}} onClick={()=>checkPlato(p,client)}>
+                  + Asignar a {client.nombre}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── KPI FORM ─────────────────────────────────────────────────────────────────
+function KPIModule({ clients, setClients }) {
+  const [selectedId, setSelectedId] = useState(clients[0]?.id||1);
+  const [temp, setTemp] = useState("65");
+  const [usabilidad, setUsabilidad] = useState("Se comió directo");
+  const [sabor, setSabor] = useState(0);
+  const [textura, setTextura] = useState(0);
+  const [apariencia, setApariencia] = useState(0);
+  const [notas, setNotas] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = () => {
+    if (!notas || sabor===0) return;
+    const visita = { temp:`${temp}°C`, usabilidad, sabor, textura, apariencia, notas, fecha: new Date().toISOString().split("T")[0], generado: true };
+    setClients(prev => prev.map(c => c.id===selectedId ? {...c, visitasHoy: [...c.visitasHoy, visita]} : c));
+    setSaved(true);
+    setTimeout(()=>setSaved(false), 2500);
+    setNotas(""); setSabor(0); setTextura(0); setApariencia(0);
+  };
+
+  const Stars = ({val, setVal}) => (
+    <div className="flex gap-1">
+      {[1,2,3,4,5].map(i => (
+        <span key={i} className="star" onClick={()=>setVal(i)}>
+          <icons.Star size={22} fill={i<=val?"#f59e0b":"none"} color="#f59e0b"/>
+        </span>
+      ))}
+    </div>
+  );
+
+  return (
+    <div className="fade-in">
+      <div className="flex items-center gap-3 mb-6">
+        <div style={{background:"var(--granate-pale)",borderRadius:"12px",padding:"10px"}}>
+          <icons.ClipboardList size={22}/>
+        </div>
+        <div>
+          <h2 className="font-display text-xl font-bold" style={{color:"var(--granate)"}}>Protocolo Post-Visita</h2>
+          <p style={{color:"var(--text-soft)",fontSize:"13px"}}>Registro de KPIs del repartidor tras la visita domiciliaria</p>
+        </div>
+      </div>
+
+      {saved && (
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-xl" style={{background:"var(--verde-pale)",border:"1px solid #6ee7b7",color:"var(--verde)",fontWeight:600}}>
+          <icons.Check size={16}/> KPIs guardados. Portal familiar actualizado en tiempo real ✓
+        </div>
+      )}
+
+      <div className="card p-5 mb-5">
+        <div className="grid gap-4" style={{gridTemplateColumns:"1fr 1fr"}}>
+          <div style={{gridColumn:"1/-1"}}>
+            <label>Cliente visitado</label>
+            <select value={selectedId} onChange={e=>setSelectedId(parseInt(e.target.value))}>
+              {clients.map(c=><option key={c.id} value={c.id}>{c.nombre}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>🌡 Temperatura de entrega (°C)</label>
+            <input type="number" value={temp} onChange={e=>setTemp(e.target.value)} placeholder="65"/>
+            {parseInt(temp) < 60 && <div className="badge-alerta mt-1" style={{fontSize:"11px"}}>⚠ Temperatura inferior a 60°C — revisar</div>}
+          </div>
+          <div>
+            <label>📦 Usabilidad del envase</label>
+            <select value={usabilidad} onChange={e=>setUsabilidad(e.target.value)}>
+              <option>Se comió directo</option>
+              <option>Emplatado en formato catering familiar</option>
+              <option>Necesitó ayuda</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="section-divider"/>
+
+        <div className="grid gap-4" style={{gridTemplateColumns:"1fr 1fr 1fr"}}>
+          <div>
+            <label style={{marginBottom:"8px"}}>⭐ Sabor</label>
+            <Stars val={sabor} setVal={setSabor}/>
+          </div>
+          <div>
+            <label style={{marginBottom:"8px"}}>🥄 Textura</label>
+            <Stars val={textura} setVal={setTextura}/>
+          </div>
+          <div>
+            <label style={{marginBottom:"8px"}}>👁 Apariencia</label>
+            <Stars val={apariencia} setVal={setApariencia}/>
+          </div>
+        </div>
+
+        <div className="section-divider"/>
+
+        <div>
+          <label>💬 Notas cualitativas — Estado de ánimo y observaciones *</label>
+          <textarea value={notas} onChange={e=>setNotas(e.target.value)} rows={4}
+            placeholder="Ej: La persona estaba alegre y conversadora. Comió casi todo el plato con ayuda. Preguntó por sus nietos..."
+            style={{resize:"vertical"}}/>
+          <p style={{fontSize:"11px",color:"var(--text-soft)",marginTop:4}}>
+            Estas notas serán procesadas por IA para generar el resumen del Portal Familiar
+          </p>
+        </div>
+
+        <div className="mt-4">
+          <button className="btn-primary" style={{padding:"12px 28px",fontSize:"15px"}} onClick={handleSave}
+            disabled={!notas || sabor===0}
+            style={{padding:"12px 28px",fontSize:"15px",background:(!notas||sabor===0)?"#cbd5e1":"var(--granate)",color:"white",border:"none",borderRadius:"8px",cursor:(!notas||sabor===0)?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif",fontWeight:500}}>
+            Guardar KPIs y notificar familia
+          </button>
+        </div>
+      </div>
+
+      {/* Historial */}
+      <h3 style={{fontWeight:700,marginBottom:"12px",fontSize:"15px"}}>📋 Visitas registradas hoy</h3>
+      {clients.filter(c=>c.visitasHoy.length>0).map(c=>(
+        <div key={c.id} className="card p-4 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <span style={{fontWeight:600}}>{c.nombre}</span>
+            <span className="badge-ok">Visitado ✓</span>
+          </div>
+          {c.visitasHoy.slice(-1).map((v,i)=>(
+            <div key={i} style={{fontSize:"13px",color:"var(--text-soft)"}}>
+              <span>🌡 {v.temp} · 📦 {v.usabilidad} · ⭐ Sabor: {v.sabor}/5</span>
+              <div className="mt-1" style={{fontStyle:"italic"}}>"{v.notas.substring(0,80)}..."</div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── PORTAL FAMILIAR ─────────────────────────────────────────────────────────
+function PortalFamiliar({ clients, setClients }) {
+  const [selectedId, setSelectedId] = useState(clients[0]?.id||1);
+  const [showWhatsApp, setShowWhatsApp] = useState(false);
+  const [newLike, setNewLike] = useState("");
+  const [newDislike, setNewDislike] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiText, setAiText] = useState(null);
+  const client = clients.find(c=>c.id===selectedId);
+
+  const generateSummary = () => {
+    if (!client || !client.visitasHoy.length) return;
+    setAiLoading(true);
+    setTimeout(()=>{
+      setAiText(generateAISummary(client, client.visitasHoy[client.visitasHoy.length-1]));
+      setAiLoading(false);
+    }, 1800);
+  };
+
+  const addLike = () => {
+    if (!newLike.trim()) return;
+    setClients(prev=>prev.map(c=>c.id===selectedId?{...c,preferencias:{...c.preferencias,likes:[...c.preferencias.likes,newLike.trim()]}}:c));
+    setNewLike("");
+  };
+  const addDislike = () => {
+    if (!newDislike.trim()) return;
+    setClients(prev=>prev.map(c=>c.id===selectedId?{...c,preferencias:{...c.preferencias,dislikes:[...c.preferencias.dislikes,newDislike.trim()]}}:c));
+    setNewDislike("");
+  };
+  const removeLike = (item) => setClients(prev=>prev.map(c=>c.id===selectedId?{...c,preferencias:{...c.preferencias,likes:c.preferencias.likes.filter(x=>x!==item)}}:c));
+  const removeDislike = (item) => setClients(prev=>prev.map(c=>c.id===selectedId?{...c,preferencias:{...c.preferencias,dislikes:c.preferencias.dislikes.filter(x=>x!==item)}}:c));
+
+  const whatsappText = aiText || (client?.visitasHoy.length ? generateAISummary(client, client.visitasHoy[client.visitasHoy.length-1]) : "");
+
+  return (
+    <div className="fade-in">
+      {/* Header */}
+      <div style={{background:"linear-gradient(135deg, var(--granate) 0%, #5c001a 100%)",borderRadius:"20px",padding:"24px",marginBottom:"24px",color:"white"}}>
+        <div style={{fontSize:"12px",opacity:0.7,marginBottom:4}}>PORTAL FAMILIAR · DABBAS</div>
+        <div className="font-display" style={{fontSize:"22px",fontWeight:700}}>Área de Seguimiento</div>
+        <div style={{fontSize:"13px",opacity:0.8,marginTop:2}}>Toda la información de tu familiar, en un solo lugar</div>
+      </div>
+
+      {/* Selector usuario */}
+      <div className="card p-4 mb-5">
+        <label>Ver perfil de</label>
+        <div className="flex gap-3 mt-2 flex-wrap">
+          {clients.map(c=>(
+            <button key={c.id} onClick={()=>{setSelectedId(c.id);setAiText(null);}}
+              style={{padding:"8px 18px",borderRadius:"20px",border:"1.5px solid",cursor:"pointer",fontWeight:600,fontSize:"14px",fontFamily:"'DM Sans',sans-serif",transition:"all 0.2s",
+                background:selectedId===c.id?"var(--granate)":"white",
+                borderColor:selectedId===c.id?"var(--granate)":"var(--border)",
+                color:selectedId===c.id?"white":"var(--text-soft)"
+              }}>
+              {c.nombre.split(" ")[0]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {client && (
+        <div className="grid gap-5" style={{gridTemplateColumns:"1fr 1fr"}}>
+          {/* Perfil */}
+          <div className="card p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div style={{width:52,height:52,borderRadius:"50%",background:"linear-gradient(135deg,var(--granate),#c0394e)",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"20px",fontWeight:700,fontFamily:"'Playfair Display',serif"}}>
+                {client.nombre.charAt(0)}
+              </div>
+              <div>
+                <div className="font-display" style={{fontWeight:700,fontSize:"18px"}}>{client.nombre}</div>
+                <div style={{color:"var(--text-soft)",fontSize:"13px"}}>{client.edad} años · {client.autonomia}</div>
+              </div>
+            </div>
+            <div style={{background:"var(--pizarra)",borderRadius:"10px",padding:"12px",marginBottom:"12px"}}>
+              <div style={{fontSize:"12px",fontWeight:600,color:"var(--text-soft)",marginBottom:"6px"}}>CONTACTO FAMILIAR</div>
+              <div style={{fontSize:"13px",fontWeight:600}}>{client.contactoNombre}</div>
+              <div style={{fontSize:"13px",color:"var(--text-soft)"}}>{client.contactoTel}</div>
+            </div>
+            <div>
+              <div style={{fontSize:"12px",fontWeight:600,color:"var(--text-soft)",marginBottom:"6px"}}>ALERTAS CLÍNICAS</div>
+              <div className="flex gap-2 flex-wrap">
+                {client.alertas.length ? client.alertas.map(a=><span key={a} className="badge-alerta">{a}</span>) : <span className="badge-ok">Sin alertas</span>}
+              </div>
+            </div>
+            {client.exclusiones.length > 0 && (
+              <div className="mt-3">
+                <div style={{fontSize:"12px",fontWeight:600,color:"var(--text-soft)",marginBottom:"6px"}}>EXCLUSIONES ACTIVAS</div>
+                <div className="flex gap-2 flex-wrap">
+                  {client.exclusiones.map(e=><span key={e} className="badge-warn">{e}</span>)}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Resumen IA */}
+          <div className="card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <icons.Sparkles size={16}/>
+              <span style={{fontWeight:700,fontSize:"15px"}}>Resumen Diario IA</span>
+            </div>
+            {client.visitasHoy.length === 0 ? (
+              <div style={{background:"var(--pizarra)",borderRadius:"10px",padding:"16px",color:"var(--text-soft)",fontSize:"13px",textAlign:"center"}}>
+                <div style={{fontSize:"24px",marginBottom:"8px"}}>🕐</div>
+                Aún no se ha registrado la visita de hoy. Recibirás una notificación en cuanto llegue.
+              </div>
+            ) : (
+              <>
+                {aiLoading ? (
+                  <div style={{background:"var(--granate-pale)",borderRadius:"12px",padding:"16px",textAlign:"center"}}>
+                    <div style={{fontSize:"20px",marginBottom:"6px"}}>✨</div>
+                    <div style={{fontSize:"13px",color:"var(--granate)",fontWeight:500}}>Generando resumen personalizado...</div>
+                  </div>
+                ) : aiText ? (
+                  <div style={{background:client.alertas.length?"#fff7ed":"var(--verde-pale)",borderRadius:"12px",padding:"16px",border:"1px solid",borderColor:client.alertas.length?"#fed7aa":"#6ee7b7",fontSize:"14px",lineHeight:"1.6",color:"var(--text-main)"}}>
+                    {aiText}
+                  </div>
+                ) : (
+                  <div style={{background:"var(--crema)",borderRadius:"12px",padding:"16px",fontSize:"13px",color:"var(--text-soft)",fontStyle:"italic",lineHeight:"1.6"}}>
+                    Pulsa "Generar resumen" para ver el informe de hoy procesado por IA basado en las notas del repartidor.
+                  </div>
+                )}
+                <div className="flex gap-2 mt-3">
+                  <button className="btn-primary flex-1" style={{fontSize:"13px",padding:"9px"}} onClick={generateSummary}>
+                    ✨ Generar resumen
+                  </button>
+                  {(aiText || client.visitasHoy.length > 0) && (
+                    <button onClick={()=>setShowWhatsApp(true)} style={{background:"#25D366",color:"white",border:"none",borderRadius:"8px",padding:"9px 14px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",fontWeight:600,fontSize:"13px",display:"flex",alignItems:"center",gap:"6px"}}>
+                      <icons.Send size={14}/> WhatsApp
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Preferencias */}
+      {client && (
+        <div className="card p-5 mt-5">
+          <div className="flex items-center gap-2 mb-4">
+            <icons.Heart size={16}/>
+            <h3 style={{fontWeight:700,fontSize:"15px"}}>Gestión de Preferencias · Buzón Gustos</h3>
+          </div>
+          <div className="grid gap-5" style={{gridTemplateColumns:"1fr 1fr"}}>
+            <div>
+              <div style={{fontWeight:600,fontSize:"13px",color:"var(--verde)",marginBottom:"8px"}}>✅ Le gusta</div>
+              {client.preferencias.likes.map(item=>(
+                <div key={item} className="preference-like">
+                  <span style={{fontSize:"13px",fontWeight:500}}>{item}</span>
+                  <button onClick={()=>removeLike(item)} style={{background:"none",border:"none",cursor:"pointer",color:"#dc2626"}}><icons.X size={14}/></button>
+                </div>
+              ))}
+              <div className="flex gap-2 mt-2">
+                <input value={newLike} onChange={e=>setNewLike(e.target.value)} placeholder="Añadir plato favorito..." style={{fontSize:"13px"}} onKeyDown={e=>e.key==="Enter"&&addLike()}/>
+                <button className="btn-primary" style={{padding:"8px 12px",flexShrink:0}} onClick={addLike}><icons.Plus size={14}/></button>
+              </div>
+            </div>
+            <div>
+              <div style={{fontWeight:600,fontSize:"13px",color:"var(--rojo-alerta)",marginBottom:"8px"}}>❌ No le gusta</div>
+              {client.preferencias.dislikes.map(item=>(
+                <div key={item} className="preference-dislike">
+                  <span style={{fontSize:"13px",fontWeight:500}}>{item}</span>
+                  <button onClick={()=>removeDislike(item)} style={{background:"none",border:"none",cursor:"pointer",color:"#dc2626"}}><icons.X size={14}/></button>
+                </div>
+              ))}
+              <div className="flex gap-2 mt-2">
+                <input value={newDislike} onChange={e=>setNewDislike(e.target.value)} placeholder="Añadir rechazo..." style={{fontSize:"13px"}} onKeyDown={e=>e.key==="Enter"&&addDislike()}/>
+                <button style={{background:"var(--rojo-pale)",color:"var(--rojo-alerta)",border:"1.5px solid #fca5a5",borderRadius:"8px",padding:"8px 12px",flexShrink:0,cursor:"pointer"}} onClick={addDislike}><icons.Plus size={14}/></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Modal */}
+      {showWhatsApp && client && (
+        <div className="modal-overlay" onClick={()=>setShowWhatsApp(false)}>
+          <div className="modal-box" onClick={e=>e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display font-bold" style={{fontSize:"18px"}}>Vista Previa WhatsApp</h3>
+              <button onClick={()=>setShowWhatsApp(false)} style={{background:"none",border:"none",cursor:"pointer"}}><icons.X size={20}/></button>
+            </div>
+            <div className="whatsapp-mock">
+              <div style={{background:"#128C7E",padding:"12px 16px",display:"flex",alignItems:"center",gap:"10px"}}>
+                <div style={{width:36,height:36,borderRadius:"50%",background:"rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontWeight:700}}>D</div>
+                <div><div style={{color:"white",fontWeight:600,fontSize:"14px"}}>DABBAS Servicio</div><div style={{color:"rgba(255,255,255,0.7)",fontSize:"11px"}}>en línea</div></div>
+              </div>
+              <div style={{padding:"16px",background:"#ece5dd",minHeight:"140px"}}>
+                <div className="wabubble">
+                  <div style={{fontSize:"11px",color:"#667781",marginBottom:"4px"}}>DABBAS · Informe diario</div>
+                  <div style={{lineHeight:"1.5"}}>{whatsappText || generateAISummary(client, client.visitasHoy[client.visitasHoy.length-1])}</div>
+                  <div style={{fontSize:"10px",color:"#667781",textAlign:"right",marginTop:"4px"}}>✓✓ {new Date().toLocaleTimeString("es",{hour:"2-digit",minute:"2-digit"})}</div>
+                </div>
+              </div>
+            </div>
+            <div style={{fontSize:"12px",color:"var(--text-soft)",textAlign:"center",marginTop:"12px"}}>
+              Enviado a: {client.contactoNombre} · {client.contactoTel}
+            </div>
+            <button className="btn-primary w-full mt-3" style={{background:"#25D366",fontSize:"14px",padding:"11px"}} onClick={()=>setShowWhatsApp(false)}>
+              ✓ Simulación completada
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+  const [env, setEnv] = useState("interno");
+  const [tab, setTab] = useState("gestion");
+  const [clients, setClients] = useState(initialClients);
+
+  const tabsInterno = [
+    { id: "gestion", label: "Gestión Dietética", icon: <icons.Users size={15}/> },
+    { id: "logistica", label: "Logística & COGS", icon: <icons.Package size={15}/> },
+    { id: "kpi", label: "Protocolo Post-Visita", icon: <icons.ClipboardList size={15}/> },
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:"var(--pizarra)"}}>
+      {/* HEADER */}
+      <div style={{background:"white",borderBottom:"1px solid var(--border)",padding:"0 24px",position:"sticky",top:0,zIndex:100}}>
+        <div style={{maxWidth:1200,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",height:64}}>
+          <div className="flex items-center gap-3">
+            <div style={{background:"var(--granate)",borderRadius:"10px",padding:"8px 12px",display:"flex",alignItems:"center",gap:"6px"}}>
+              <span style={{color:"white",fontFamily:"'Playfair Display',serif",fontWeight:700,fontSize:"18px",letterSpacing:"1px"}}>DABBAS</span>
+            </div>
+            <div style={{width:1,height:28,background:"var(--border)"}}/>
+            <span style={{fontSize:"13px",color:"var(--text-soft)"}}>Nutrición & Acompañamiento · Bilbao–Mungia</span>
+          </div>
+          <div className="env-toggle">
+            <button className={env==="interno"?"env-btn-active":"env-btn-inactive"} onClick={()=>setEnv("interno")}>
+              ⚙ Back-Office
+            </button>
+            <button className={env==="familiar"?"env-btn-active":"env-btn-inactive"} onClick={()=>setEnv("familiar")}>
+              👨‍👩‍👧 Portal Familiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SUB-NAV (solo interno) */}
+      {env === "interno" && (
+        <div style={{background:"white",borderBottom:"1px solid var(--border)",padding:"0 24px"}}>
+          <div style={{maxWidth:1200,margin:"0 auto",display:"flex",gap:"4px",padding:"8px 0"}}>
+            {tabsInterno.map(t=>(
+              <button key={t.id} className={tab===t.id?"tab-active":"tab-inactive"} onClick={()=>setTab(t.id)}
+                style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"13px"}}>
+                {t.icon} {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CONTENT */}
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"28px 24px"}}>
+        {env === "interno" && tab === "gestion" && <OnboardingForm clients={clients} setClients={setClients}/>}
+        {env === "interno" && tab === "logistica" && <LogisticaModule clients={clients}/>}
+        {env === "interno" && tab === "kpi" && <KPIModule clients={clients} setClients={setClients}/>}
+        {env === "familiar" && <PortalFamiliar clients={clients} setClients={setClients}/>}
+      </div>
+
+      {/* FOOTER */}
+      <div style={{borderTop:"1px solid var(--border)",padding:"16px 24px",marginTop:"40px",textAlign:"center"}}>
+        <span style={{fontSize:"12px",color:"var(--text-soft)"}}>
+          DABBAS © 2025 · Demo Day Universitario · Prototipo interactivo
+        </span>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
